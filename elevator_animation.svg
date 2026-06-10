@@ -49,37 +49,31 @@
     }
 
     @keyframes doorLeftMove {
-      /* Floor 0 doors open (0.5s to 1.5s -> 3.12% to 9.38%) */
       0%, 3.12% { transform: translateX(0); }
       6.25%, 8.5% { transform: translateX(-14px); }
       11.5%, 31.25% { transform: translateX(0); }
       
-      /* Floor 1 doors open (5.5s to 6.5s -> 34.38% to 40.63%) */
       31.25%, 34.38% { transform: translateX(0); }
       37.5%, 39.5% { transform: translateX(-14px); }
       43.75%, 62.5% { transform: translateX(0); }
       
-      /* Floor 2 doors open (10.2s to 10.8s, interrupt at 11s, reopen, close at 11.8s) */
       62.5%, 63.75% { transform: translateX(0); }
-      66.25% { transform: translateX(-14px); } /* Opened */
-      68.25% { transform: translateX(-4px); }  /* Closing... */
-      69.5% { transform: translateX(-14px); }  /* Safety Reopen */
-      73.5% { transform: translateX(0); }      /* Closed */
+      66.25% { transform: translateX(-14px); }
+      68.25% { transform: translateX(-4px); }
+      69.5% { transform: translateX(-14px); }
+      73.5% { transform: translateX(0); }
       100% { transform: translateX(0); }
     }
 
     @keyframes doorRightMove {
-      /* Floor 0 doors open */
       0%, 3.12% { transform: translateX(0); }
       6.25%, 8.5% { transform: translateX(14px); }
       11.5%, 31.25% { transform: translateX(0); }
       
-      /* Floor 1 doors open */
       31.25%, 34.38% { transform: translateX(0); }
       37.5%, 39.5% { transform: translateX(14px); }
       43.75%, 62.5% { transform: translateX(0); }
       
-      /* Floor 2 doors open */
       62.5%, 63.75% { transform: translateX(0); }
       66.25% { transform: translateX(14px); }
       68.25% { transform: translateX(4px); }
@@ -89,9 +83,6 @@
     }
 
     /* 7-Segment Digit Control */
-    /* Digit 0: A, B, C, D, E, F = ON; G = OFF */
-    /* Digit 1: B, C = ON; A, D, E, F, G = OFF */
-    /* Digit 2: A, B, D, E, G = ON; C, F = OFF */
     @keyframes segA {
       0%, 21.87% { opacity: 1.0; }
       21.88%, 53.12% { opacity: 0.1; }
@@ -129,35 +120,41 @@
     /* Arrow indicators */
     @keyframes upArrowAnim {
       0%, 12.5% { fill: #1e293b; filter: none; }
-      12.6%, 31.24% { fill: #22c55e; filter: url(#glowGreen); } /* Moving to Floor 1 */
+      12.6%, 31.24% { fill: #22c55e; filter: url(#glowGreen); }
       31.25%, 43.74% { fill: #1e293b; filter: none; }
-      43.75%, 62.4% { fill: #22c55e; filter: url(#glowGreen); } /* Moving to Floor 2 */
+      43.75%, 62.4% { fill: #22c55e; filter: url(#glowGreen); }
       62.5%, 100% { fill: #1e293b; filter: none; }
     }
     @keyframes downArrowAnim {
       0%, 74.99% { fill: #1e293b; filter: none; }
-      75%, 93.74% { fill: #f97316; filter: url(#glowOrange); } /* Moving down to Floor 0 */
+      75%, 93.74% { fill: #f97316; filter: url(#glowOrange); }
       93.75%, 100% { fill: #1e293b; filter: none; }
     }
 
     /* Safety Alert Light */
     @keyframes safetyLightAnim {
       0%, 67.5% { fill: #334155; filter: none; }
-      68%, 71% { fill: #ef4444; filter: url(#glowRed); } /* Active safety stop */
+      68%, 71% { fill: #ef4444; filter: url(#glowRed); }
       71.5%, 100% { fill: #334155; filter: none; }
     }
 
     /* Telemetry Text Scrolling Console */
     @keyframes consoleLog {
-      0%, 12.4% { transform: translateY(0px); }
-      12.5%, 31.24% { transform: translateY(-20px); }
-      31.25%, 43.74% { transform: translateY(-40px); }
-      43.75%, 62.4% { transform: translateY(-60px); }
-      62.5%, 67.4% { transform: translateY(-80px); }
-      67.5%, 74.9% { transform: translateY(-100px); } /* Safety event */
-      75%, 93.74% { transform: translateY(-120px); }
-      93.75%, 100% { transform: translateY(-140px); }
+      0%, 62.49% { transform: translateY(0px); }
+      62.5%, 67.49% { transform: translateY(-44px); }
+      67.5%, 74.99% { transform: translateY(-110px); }
+      75%, 93.74% { transform: translateY(-176px); }
+      93.75%, 100% { transform: translateY(-242px); }
     }
+
+    /* Individual Log Line Fades to avoid overlapping */
+    @keyframes fade_p1 { 0%, 12.49% { opacity: 0; } 12.5%, 100% { opacity: 1; } }
+    @keyframes fade_p2 { 0%, 31.24% { opacity: 0; } 31.25%, 100% { opacity: 1; } }
+    @keyframes fade_p3 { 0%, 43.74% { opacity: 0; } 43.75%, 100% { opacity: 1; } }
+    @keyframes fade_p4 { 0%, 62.49% { opacity: 0; } 62.5%, 100% { opacity: 1; } }
+    @keyframes fade_p5 { 0%, 67.49% { opacity: 0; } 67.5%, 100% { opacity: 1; } }
+    @keyframes fade_p6 { 0%, 74.99% { opacity: 0; } 75%, 100% { opacity: 1; } }
+    @keyframes fade_p7 { 0%, 93.74% { opacity: 0; } 93.75%, 100% { opacity: 1; } }
 
     /* Classes for Animation Bindings */
     .cabin { animation: cabinMovement 16s infinite ease-in-out; }
@@ -175,6 +172,15 @@
     .segment-e { animation: segE 16s infinite steps(1); }
     .segment-f { animation: segF 16s infinite steps(1); }
     .segment-g { animation: segG 16s infinite steps(1); }
+
+    .log-p0 { opacity: 1; }
+    .log-p1 { animation: fade_p1 16s infinite steps(1); }
+    .log-p2 { animation: fade_p2 16s infinite steps(1); }
+    .log-p3 { animation: fade_p3 16s infinite steps(1); }
+    .log-p4 { animation: fade_p4 16s infinite steps(1); }
+    .log-p5 { animation: fade_p5 16s infinite steps(1); }
+    .log-p6 { animation: fade_p6 16s infinite steps(1); }
+    .log-p7 { animation: fade_p7 16s infinite steps(1); }
   </style>
 
   <!-- Main Background Panel -->
@@ -235,22 +241,21 @@
     <rect x="40" y="40" width="100" height="150" rx="8" fill="#020617" stroke="#334155" stroke-width="2"/>
     <text x="90" y="55" class="ui-text" fill="#475569" font-size="9" text-anchor="middle" letter-spacing="0.5">CURRENT FLOOR</text>
 
-    <!-- 7-Segment LED Geometry (Standard 7-Seg representation) -->
-    <!-- Segments coordinate grid relative to center (90,115) -->
+    <!-- 7-Segment LED Geometry -->
     <g transform="translate(75, 65)">
-      <!-- Segment a (top) -->
+      <!-- Segment a -->
       <rect x="5" y="0" width="20" height="4" rx="2" fill="#ef4444" class="segment-a" />
-      <!-- Segment f (top-left) -->
+      <!-- Segment f -->
       <rect x="0" y="4" width="4" height="20" rx="2" fill="#ef4444" class="segment-f" />
-      <!-- Segment b (top-right) -->
+      <!-- Segment b -->
       <rect x="26" y="4" width="4" height="20" rx="2" fill="#ef4444" class="segment-b" />
-      <!-- Segment g (middle) -->
+      <!-- Segment g -->
       <rect x="5" y="24" width="20" height="4" rx="2" fill="#ef4444" class="segment-g" />
-      <!-- Segment e (bottom-left) -->
+      <!-- Segment e -->
       <rect x="0" y="28" width="4" height="20" rx="2" fill="#ef4444" class="segment-e" />
-      <!-- Segment c (bottom-right) -->
+      <!-- Segment c -->
       <rect x="26" y="28" width="4" height="20" rx="2" fill="#ef4444" class="segment-c" />
-      <!-- Segment d (bottom) -->
+      <!-- Segment d -->
       <rect x="5" y="48" width="20" height="4" rx="2" fill="#ef4444" class="segment-d" />
     </g>
 
@@ -284,77 +289,50 @@
     <circle cx="39" cy="12" r="4" fill="#22c55e" />
     <text x="157" y="16" class="ui-text" fill="#64748b" font-size="9" text-anchor="middle" letter-spacing="1">UART MONITORING TERMINAL</text>
 
-    <!-- Console Text Window Clip Path (to prevent text overflow) -->
+    <!-- Console Text Window Clip Path (bounds the scrolling region) -->
     <clipPath id="consoleClip">
       <rect x="10" y="35" width="295" height="250" />
     </clipPath>
 
-    <!-- Scrolling Text Group -->
+    <!-- Sequential Text Group -->
     <g clip-path="url(#consoleClip)">
-      <g class="console-scroll">
-        <!-- Frame 0: Startup & Idle -->
-        <g transform="translate(0, 40)">
-          <text x="15" y="20" class="lcd-text" fill="#22c55e" font-size="10">[SYS INITIALIZE] PIC18F4520 system online</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] IDLE (Floor 0)</text>
-          <text x="15" y="60" class="lcd-text" fill="#64748b" font-size="10">[DOORS] Automated Cycle: Closed</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Waiting for target call request...</text>
-        </g>
+      <g class="console-scroll" transform="translate(0, 35)">
+        <!-- Phase 0 Log Lines -->
+        <text x="15" y="20" class="lcd-text log-p0" fill="#22c55e" font-size="10">[SYS START] PIC18F4520 online</text>
+        <text x="15" y="42" class="lcd-text log-p0" fill="#38bdf8" font-size="10">[STATE] IDLE | Floor 0 | Doors closed</text>
+        <text x="15" y="64" class="lcd-text log-p0" fill="#64748b" font-size="10">Waiting for call request...</text>
         
-        <!-- Frame 1: Call Requested -> Start Upward Movement -->
-        <g transform="translate(0, 60)">
-          <text x="15" y="20" class="lcd-text" fill="#eab308" font-size="10">[EVENT] Call registered for Floor 1</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] MOVING_UP | Target: 1</text>
-          <text x="15" y="60" class="lcd-text" fill="#38bdf8" font-size="10">[PWM DRIVER] Duty cycle ramped to 85%</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Approaching Floor 1 switch...</text>
-        </g>
-
-        <!-- Frame 2: Arrived Floor 1 -> Doors open -->
-        <g transform="translate(0, 80)">
-          <text x="15" y="20" class="lcd-text" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 1 switch</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] DOORS_OPENING (Floor 1)</text>
-          <text x="15" y="60" class="lcd-text" fill="#64748b" font-size="10">[TIMER] Doors held open (5s delay)</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Closing doors shortly...</text>
-        </g>
-
-        <!-- Frame 3: Call Requested Floor 2 -> Moving Up -->
-        <g transform="translate(0, 100)">
-          <text x="15" y="20" class="lcd-text" fill="#eab308" font-size="10">[EVENT] Call registered for Floor 2</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] MOVING_UP | Target: 2</text>
-          <text x="15" y="60" class="lcd-text" fill="#38bdf8" font-size="10">[PWM DRIVER] Duty cycle ramped to 85%</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Entering Floor 2 alignment phase...</text>
-        </g>
-
-        <!-- Frame 4: Arrive Floor 2 -> Opening Doors -->
-        <g transform="translate(0, 120)">
-          <text x="15" y="20" class="lcd-text" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 2 switch</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] DOORS_OPENING (Floor 2)</text>
-          <text x="15" y="60" class="lcd-text" fill="#64748b" font-size="10">[DOORS] Doors fully extended</text>
-          <text x="15" y="80" class="lcd-text" fill="#eab308" font-size="10">[DOORS] Commencing close cycle...</text>
-        </g>
-
-        <!-- Frame 5: Safety Obstruction Event at Floor 2 -->
-        <g transform="translate(0, 140)">
-          <text x="15" y="20" class="lcd-text" fill="#ef4444" font-size="10">[ALERT] INTERRUPT INT0 TRIPPED</text>
-          <text x="15" y="40" class="lcd-text" fill="#ef4444" font-size="10">[WARNING] Door Safety Edge Obstruction</text>
-          <text x="15" y="60" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] Reverting to DOORS_OPENING</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Resetting hold-open timer...</text>
-        </g>
-
-        <!-- Frame 6: Moving down to Floor 0 -->
-        <g transform="translate(0, 160)">
-          <text x="15" y="20" class="lcd-text" fill="#eab308" font-size="10">[EVENT] Call registered for Floor 0</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] MOVING_DOWN | Target: 0</text>
-          <text x="15" y="60" class="lcd-text" fill="#38bdf8" font-size="10">[PWM DRIVER] Duty cycle ramped to 85%</text>
-          <text x="15" y="80" class="lcd-text" fill="#64748b" font-size="10">Bypassing Floor 1 sensors...</text>
-        </g>
-
-        <!-- Frame 7: Back to Floor 0 Idle -->
-        <g transform="translate(0, 180)">
-          <text x="15" y="20" class="lcd-text" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 0 switch</text>
-          <text x="15" y="40" class="lcd-text" fill="#38bdf8" font-size="10">[FSM STATE] IDLE (Floor 0)</text>
-          <text x="15" y="60" class="lcd-text" fill="#64748b" font-size="10">[SYSTEM] All request queues empty</text>
-          <text x="15" y="80" class="lcd-text" fill="#22c55e" font-size="10">Standby mode active.</text>
-        </g>
+        <!-- Phase 1 Log Lines (Moving to Floor 1) -->
+        <text x="15" y="86" class="lcd-text log-p1" fill="#eab308" font-size="10">[CALL] Request registered for Floor 1</text>
+        <text x="15" y="108" class="lcd-text log-p1" fill="#38bdf8" font-size="10">[STATE] MOVING_UP | Target: Floor 1</text>
+        <text x="15" y="130" class="lcd-text log-p1" fill="#38bdf8" font-size="10">[MOTOR] Speed PWM: 85% Cruise</text>
+        
+        <!-- Phase 2 Log Lines (Arrived Floor 1) -->
+        <text x="15" y="152" class="lcd-text log-p2" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 1 Switch</text>
+        <text x="15" y="174" class="lcd-text log-p2" fill="#38bdf8" font-size="10">[STATE] DOORS_OPENING | Floor 1</text>
+        <text x="15" y="196" class="lcd-text log-p2" fill="#64748b" font-size="10">[TIMER] Doors holding (5s duration)</text>
+        
+        <!-- Phase 3 Log Lines (Moving to Floor 2) -->
+        <text x="15" y="218" class="lcd-text log-p3" fill="#eab308" font-size="10">[CALL] Request registered for Floor 2</text>
+        <text x="15" y="240" class="lcd-text log-p3" fill="#38bdf8" font-size="10">[STATE] MOVING_UP | Target: Floor 2</text>
+        
+        <!-- Phase 4 Log Lines (Arrived Floor 2) -->
+        <text x="15" y="262" class="lcd-text log-p4" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 2 Switch</text>
+        <text x="15" y="284" class="lcd-text log-p4" fill="#38bdf8" font-size="10">[STATE] DOORS_OPENING | Floor 2</text>
+        
+        <!-- Phase 5 Log Lines (Safety Sensor Interrupt) -->
+        <text x="15" y="306" class="lcd-text log-p5" fill="#ef4444" font-size="10">[ISR] INTERRUPT INT0 TRIPPED</text>
+        <text x="15" y="328" class="lcd-text log-p5" fill="#ef4444" font-size="10">[ALERT] Safety Edge Obstruction Detected</text>
+        <text x="15" y="350" class="lcd-text log-p5" fill="#38bdf8" font-size="10">[RECON] Safety Reversal: Re-open doors</text>
+        
+        <!-- Phase 6 Log Lines (Moving to Floor 0) -->
+        <text x="15" y="372" class="lcd-text log-p6" fill="#eab308" font-size="10">[CALL] Request registered for Floor 0</text>
+        <text x="15" y="394" class="lcd-text log-p6" fill="#38bdf8" font-size="10">[STATE] MOVING_DOWN | Target: Floor 0</text>
+        <text x="15" y="416" class="lcd-text log-p6" fill="#38bdf8" font-size="10">[MOTOR] Speed PWM: 85% Cruise</text>
+        
+        <!-- Phase 7 Log Lines (Back to Floor 0) -->
+        <text x="15" y="438" class="lcd-text log-p7" fill="#22c55e" font-size="10">[LIMIT] Reached Floor 0 Switch</text>
+        <text x="15" y="460" class="lcd-text log-p7" fill="#38bdf8" font-size="10">[STATE] IDLE | Floor 0 | Standby Active</text>
       </g>
     </g>
   </g>
