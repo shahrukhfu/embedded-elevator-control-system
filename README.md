@@ -4,6 +4,14 @@ A multi-floor intelligent elevator control and monitoring system using the PIC18
 
 ---
 
+## Interactive Simulation Dashboard
+
+Below is a live, self-contained interactive SVG dashboard illustrating the physical movement, door cycles, 7-segment display logic, and UART serial communication logs of the system:
+
+![Elevator Control Simulation](elevator_animation.svg)
+
+---
+
 ## Schematic Design
 
 The circuit schematic represents the hardware configuration of the system, illustrating the connections between the PIC18F4520, the L293D motor driver, visual status indicators (LCD and 7-segment), user request interfaces, and the UART monitoring connection.
@@ -170,7 +178,7 @@ To run the hardware and software simulation:
 
 1.  Clone this repository:
     ```bash
-    git clone https://github.com/your-username/elevator-control-system.git
+    git clone https://github.com/shahrukhfu/embedded-elevator-control-system.git
     ```
 2.  Launch Proteus Design Suite and open the `elevator.pdsprj` file.
 3.  Double-click the **PIC18F4520** symbol to open the component properties box.
