@@ -32,15 +32,17 @@ The system runs on a PIC18F4520 configured with an external oscillator (typicall
 
 *   **Oscillator & Ports Control**:
     *   `ADCON1 = 0x0F`: Configures all analog channels as digital I/O pins to prevent interference on Port A and Port B.
-    *   `TRISA = 0x1F`: Sets Port A pins (RA0-RA4) as inputs to monitor physical limit switches, safety sensor, and emergency stop signals.
-    *   `TRISD = 0x00` / `TRISC = 0x80`: Sets Port D as outputs for the LCD data bus (RD4-RD7) and BCD-to-7segment decoder (RD0-RD3), and configures Port C with RC7/RX as input, and RC0/RC1/RC2/RC3/RC6 as outputs.
+    *   `TRISB = 0xF1`: Sets RB0 and RB4–RB7 as inputs to monitor the emergency stop and floor requests/safety sensor.
+    *   `TRISA = 0x00`: Sets Port A pins (RA0-RA3) as outputs to drive the 74LS47 decoder.
+    *   `TRISD = 0x00` / `TRISC = 0x80`: Sets Port D as outputs for the display modules (LCD data RD4-RD7, LCD control RD2-RD3), and configures Port C with RC7/RX as input, and RC2-RC4, RC6 as outputs.
 *   **PWM Generation (CCP1 Module)**:
     *   `PR2`: Preset register configured to establish the PWM carrier frequency (typically ~2 kHz to 5 kHz for DC motor control).
     *   `T2CON = 0x05`: Configures Timer 2 with a prescaler of 4 and turns the timer on.
     *   `CCP1CON = 0x0C`: Configures the CCP1 module in Pulse Width Modulation mode on RC2.
     *   `CCPR1L`: Modulated runtime duty cycle register (controls motor speed).
 *   **Interrupt Configuration**:
-    *   `INTCON = 0xC0`: Enables global interrupts (GIE) and peripheral interrupts (PEIE).
+    *   `INTCON = 0xD8`: Enables global interrupts (GIE), peripheral interrupts (PEIE), RB0/INT0 external interrupt (INT0IE), and PORTB change interrupts (RBIE).
+    *   `INTCON2 = 0x00`: Configures Port B pull-ups and sets external interrupts on falling edge triggers.
     *   `PIE1 = 0x30`: Enables Timer1 (scheduling ticks) and UART receive interrupts.
 *   **UART Telemetry**:
     *   `TXSTA = 0x24`: High-speed asynchronous transmit enabled.
@@ -58,19 +60,17 @@ The physical mapping of the PIC18F4520 microcontroller inputs and outputs is def
 
 | MCU Pin | Symbol / Connection | Direction | Description |
 | :--- | :--- | :--- | :--- |
-| **RA0** | Floor 0 Limit Switch | Input | Physical limit switch for Floor 0 detection |
-| **RA1** | Floor 1 Limit Switch | Input | Physical limit switch for Floor 1 detection |
-| **RA2** | Floor 2 Limit Switch | Input | Physical limit switch for Floor 2 detection |
-| **RA3** | Safety Sensor | Input | Door obstruction photo-sensor (triggers safety reversal) |
-| **RA4** | Emergency Stop | Input | Cabin emergency stop button |
-| **RC0** | LCD RS | Output | LCD Register Select control line |
-| **RC1** | LCD EN | Output | LCD Enable control line |
-| **RC2** | `CCP1` / PWM Output | Output | PWM speed control signal (drives IN1/IN3 of L298) |
-| **RC3** | Motor Direction | Output | Motor direction control signal (drives IN2/IN4 of L298) |
-| **RC6** | `TX` / UART Transmit | Output | Serial communication interface to Virtual Terminal RXD |
-| **RC7** | `RX` / UART Receive | Input | Serial communication interface from Virtual Terminal TXD |
-| **RD0-RD3** | 7-Segment BCD (A-D) | Output | 4-bit BCD data sent to 74LS47 decoder to drive 7-segment display |
-| **RD4-RD7** | LCD Data (D4-D7) | Output | 4-bit data bus lines for text telemetry LCD |
+| **RB0** | `INT0` / Emergency Stop | Input (Interrupt) | Cabin emergency stop button (triggers high-priority interrupt) |
+| **RB4–RB7** | Floor Requests / Safety Sensor | Input (Interrupt) | PORTB Change Interrupt inputs (Floor requests and safety sensor) |
+| **RA0–RA3** | 7-Segment BCD | Output | BCD data output (A-D) driving the 74LS47 segment decoder |
+| **RD4–RD7** | LCD Data | Output | 4-bit data bus lines for the text telemetry LCD |
+| **RD2** | LCD RS | Output | LCD Register Select signal |
+| **RD3** | LCD EN | Output | LCD Enable signal |
+| **RC2** | `CCP1` / Motor PWM | Output | Motor speed control via PWM (drives L298 IN1/IN3) |
+| **RC3** | Motor Dir A | Output | H-Bridge Direction Control A (drives L298 IN2) |
+| **RC4** | Motor Dir B | Output | H-Bridge Direction Control B (drives L298 IN4) |
+| **RC6** | `TX` / UART TX | Output | Transmits status to Virtual Terminal RXD |
+| **RC7** | `RX` / UART RX | Input | Receives commands from Virtual Terminal TXD |
 
 </p>
 </details>
@@ -82,12 +82,12 @@ The physical mapping of the PIC18F4520 microcontroller inputs and outputs is def
 The system operates strictly within a deterministic FSM framework to prevent race conditions during concurrent interrupts and motor transitions:
 
 *   **IDLE (State 0x00)**: The cabin is stationary at a floor. Doors are closed. The PWM duty cycle is 0%. The system continuously checks the destination queue.
-*   **MOVING_UP (State 0x01)**: The H-bridge is configured (RC2=PWM, RC3=0). The PWM ramp-up algorithm is engaged to transition from soft-start to maximum cruise duty cycle.
-*   **MOVING_DOWN (State 0x02)**: The H-bridge is reversed (RC2=PWM, RC3=1). The PWM ramp-up algorithm runs in the opposite direction.
+*   **MOVING_UP (State 0x01)**: The H-bridge is configured (RC3=1, RC4=0). The PWM ramp-up algorithm is engaged to transition from soft-start to maximum cruise duty cycle.
+*   **MOVING_DOWN (State 0x02)**: The H-bridge is reversed (RC3=0, RC4=1). The PWM ramp-up algorithm runs in the opposite direction.
 *   **DOORS_OPENING (State 0x03)**: Auxiliary door motor is powered to open the door panels.
 *   **DOORS_OPEN (State 0x04)**: Doors remain open. A hardware-linked software timer counts down (e.g., 5 seconds) to allow passengers to exit and enter.
-*   **DOORS_CLOSING (State 0x05)**: Auxiliary door motor reverses direction. If the safety sensor (RA3) triggers during this state, the state machine rolls back to `DOORS_OPENING`.
-*   **EMERGENCY_STOP (State 0x06)**: Triggered by the Emergency Stop button (RA4) or system faults. Instantly cuts off PWM drive (`CCPR1L = 0`).
+*   **DOORS_CLOSING (State 0x05)**: Auxiliary door motor reverses direction. If the safety sensor (RB4-RB7 Change Interrupt) triggers during this state, the state machine rolls back to `DOORS_OPENING`.
+*   **EMERGENCY_STOP (State 0x06)**: Triggered by the Emergency Stop button (RB0/INT0) or system faults. Instantly cuts off PWM drive (`CCPR1L = 0`).
 
 </p>
 </details>
@@ -110,16 +110,24 @@ To prevent mechanical wear and ensure passenger comfort, the motor speed is gove
 <summary><b>5. Interrupt Service Routine (ISR) Flowchart Logic</b></summary>
 <p>
 
-Interrupt execution logic is configured as follows:
+Interrupt execution logic is bifurcated to ensure safety operations execute with zero latency:
 
 ```text
+High-Priority Interrupt Vector (0x08)
+ ├── Check: Did INT0 flag trip (RB0 edge transition)?
+ │    ├── YES: Set state = EMERGENCY_STOP. Cut off motor PWM (CCPR1L = 0).
+ │    └── Clear INT0 flag.
+ └── Return from Interrupt (RETFIE).
+
 Low-Priority Interrupt Vector (0x18)
- ├── Check: Did Timer1 overflow?
+ ├── Check: Did RB Port Change flag trip (RBIF)?
  │    ├── YES: 
- │    │    ├── Poll inputs (limit switches RA0-RA2, safety sensor RA3, emergency stop RA4).
- │    │    ├── If emergency stop (RA4) is active, set state = EMERGENCY_STOP.
- │    │    ├── If safety sensor (RA3) is active and state == DOORS_CLOSING, set state = DOORS_OPENING.
- │    │    └── Increment FSM clock counters.
+ │    │    ├── Read PORTB to clear mismatch.
+ │    │    ├── If safety sensor input (RB4-RB7 change) is active and state == DOORS_CLOSING, set state = DOORS_OPENING.
+ │    │    └── If floor request inputs change, add target to floor request queue.
+ │    └── Clear RBIF flag.
+ ├── Check: Did Timer1 overflow?
+ │    ├── YES: Update display multiplexing. Increment FSM clock counters.
  │    └── Clear TMR1 flag.
  ├── Check: Did UART Receive Buffer Fill?
  │    ├── YES: Parse incoming character command. Add target to floor request queue.
@@ -150,7 +158,7 @@ stateDiagram-v2
     DOORS_OPENING --> DOORS_OPEN : Opening cycle duration elapsed
     DOORS_OPEN --> DOORS_CLOSING : Passenger boarding timer elapsed
     
-    DOORS_CLOSING --> DOORS_OPENING : Safety obstruction sensor (RA3) triggered
+    DOORS_CLOSING --> DOORS_OPENING : Safety obstruction sensor (PORTB Change Interrupt) triggered
     DOORS_CLOSING --> IDLE : Closing cycle duration elapsed
 ```
 
